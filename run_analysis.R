@@ -22,16 +22,19 @@ subject_train <- read.table(dataFiles[26])
 subject_test <- read.table(dataFiles[14])
 subjects <- rbind(subject_train, subject_test)
 
+# Extract only the columns corresponding to mean and std values
 meansAndStds <- cbind(x[1:6], x[41:46], x[81:86], x[121:126], x[161:166],
                       x[201:202], x[214:215], x[227:228], x[240:241], x[253:254],
                       x[266:271], x[294:296], x[345:350], x[373:375], x[424:429],
                       x[452:454], x[503:504], x[513], x[516:517], x[526],
                       x[529:530], x[539], x[542:543], x[552])
 
+# Replace activities with factors
 labels <- read.table(dataFiles[1])
 activities <- factor(y[[1]], labels=c("LAYING", "SITTING", "STANDING", "WALKING",
                                       "WALKING_DOWNSTAIRS", "WALKING_UPSTAIRS"))
 
+# Combine columns and add titles
 allData <- cbind(meansAndStds, activities, subjects)
 colnames(allData) <- c("tBodyAcc-mean()-X", "tBodyAcc-mean()-Y", "tBodyAcc-mean()-Z",
                        "tBodyAcc-std()-X", "tBodyAcc-std()-Y", "tBodyAcc-std()-Z)",
@@ -71,7 +74,12 @@ colnames(allData) <- c("tBodyAcc-mean()-X", "tBodyAcc-mean()-Y", "tBodyAcc-mean(
                        "fBodyBodyGyroJerkMag-mean()", "fBodyBodyGyroJerkMag-std()",
                        "fBodyBodyGyroJerkMag-meanFreq()", "activity", "subject")
 
+# Get the mean of each variable for each activity and subject
 means <- ddply(allData, .(activity, subject), function(y) sapply(y,mean))
+
+# Replace the activity column, which is destroyed in the previous operation
 means$activity <- rep(c("LAYING", "SITTING", "STANDING", "WALKING",
                          "WALKING_DOWNSTAIRS", "WALKING_UPSTAIRS"), each=30)
+
+# Save
 write.table(means, file='means.txt')
